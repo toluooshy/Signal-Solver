@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        div {
+            font-family: sans-serif;
+            margin: auto;
+        }
+
+        canvas {
+            background-color: #ffffff;
+            margin: auto;
+            display: block;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 80px;
+            margin: 0px;
+        }
+
+        span {
+            color: #ddb600;
+            text-align: center;
+        }
+
+        div {
+            text-align: center;
+        }
+
+        body {
+            padding: 10px;
+            color: #000000;
+        }
+
+        .tutorial {
+            text-align: left;
+            width: 800px;
+        }
+
+        .button {
+            margin: 10px;
+            width: 120px;
+            height: 50px;
+        }
+
+        .button2 {
+            margin: 10px;
+            width: 55px;
+            height: 120px;
+        }
+
+        .button3 {
+            margin: 10px;
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class='tutorial'>
+        <h2><i>Signal Solver</i> 📡</h2>
+        <h3>Greetings! 👋</h3>
+        <p>Hello and welcome to the world of analog and digital communications!</p>
+        <p>The world of analog and digital communications builds upon the fundamentals of how signal systems work. This
+            means that just like in signal systems, sinusoidal, domain shifting, and other combinatorial operations make
+            a return here.</p>
+        <h3>Important Terms. 📝</h3>
+        <h4>Time Domain:</h4>
+        <p>
+            This is how we usually perceive information, various amplitudes of a signal over a given amount of time. The
+            time domain usually has units listed in seconds or sometimes in samples.
+        </p>
+        <h4>Frequency Domain:</h4>
+        <p>This is another way in which signals can be perceived, but instead of various amplitudes over time it is now
+            a histogram of various bins representing all the sub-frequencies of a signal. The frequency domain has units
+            usually listed in hertz (in when linear) or ω when angular. To transfer a signal in the time domain to one
+            in the frequency domain, you can use the fourier transform—or similar variants like the discrete fourier
+            transform (DFT) or fast fourier transform (FFT).</p>
+        <h4>LTI Systems:</h4>
+        <p>Linear time-invariant (LTI) systems follow the basic input-output workflow, as shown below:</p>
+        <p>What makes them special though is that the impulse response of the system is both linear and time-invariant.
+            Considering the self-explanatory name you probably saw that coming. Here is what I mean by those two terms:
+        </p>
+        <ul>
+            <li>When the impulse response is linear it means that between the input and output, the system is scalable
+                and additive.</li>
+            <ul>
+                <li>Scalable: <i>ax1(t) → ay1(t)</i></li>
+                <li>Additive: <i>x3(t) = x1(t) + x2(t)</i> maps to <i>y3(t) = y1(t) + y2(t)</i></li>
+            </ul>
+            <br/>
+            <li>When the impulse response is time-invariant it means that regardless of where you start measuring the
+                signal, that subsection can be replicated anywhere else in the given signal.</li>
+            <ul>
+                <li>If <i>x1(t) → y1(t)</i>, then <i>x1(t − T) → y1(t − T)</i></li>
+            </ul>
+        </ul>
+        <p>Below is a pair of equations that when met, prove the LTI nature of a system.</p>
+        <ul>
+            <li>If <i>x(t) = Ax1(t − T1) + Bx2(t − T2)</i> then <i>y(t) = Ay1(t − T1) + By2(t − T2)</i></li>
+        </ul>
+        <h4>Non-LTI Systems:</h4>
+        <p>Most systems aren’t LTI systems, but that doesn’t mean that they still can’t be either linear or time
+            invariant. Sinusoidal functions like <i>cos(x)</i> and <i>sin(x)</i> are great examples of time-invariant
+            systems.
+            And simple functions that follow the <i>y = mx(t) + nx(t-1)</i> format are linear.
+        </p>
+        <h4>Convolution:</h4>
+        <p>Convolution is an operation done on two functions that produces a third function <i>f ∗ g</i> that expresses
+            how
+            each function’s respective shapes get manipulated. Mathematically convolutions take the integral of the
+            product of the two functions after one is reversed and shifted.</p>
+        <h4>Amplitude Modulation:</h4>
+        <p>Amplitude Modulation (AM) is the process by which an info-bearing signal is multiplied
+            by, or mixed with, a carrier signal to produce an AM signal more suited to propagate over long
+            distances.</p>
+        <h3>And there you have it!</h3>
+        <h3>I think you should be ready to play he game below. Here's a ticket! 🎟️</h3>
+    </div>
+
+    <div>
+        <h1 id='levellabel'>LEVEL 0</h1>
+        <canvas id='gamecanvas' width='800' height='400'>
+            Your browser does not support the HTML canvas tag.</canvas>
+    </div>
+
+    <script>
+        const c = document.getElementById('gamecanvas');
+        const ctx = c.getContext('2d');
+
+        let min = -50,
+            max = 50,
+            size = 100,
+            step = ((max - min) / size);
+
+        let data = [...Array(size + 1)].map((x, y) => min + step * y);
+        let recipe = [];
+        let order = [];
+        let matches = 0;
+        let msgline1 = ["The sine wave is one of the most", "The cosine signal (and sine signal) are", "This is literally just a parabola, but this", "See!", "Here we applied the fourier transform to", "An this is the fourier transform of the", "Here we convolved our original flatline", "Similarly to the last signal, we convolved", "Yeah this one is just for fun. :)", "This is a signal is a called a 'sinc function',", "Now this is a nifty shape. Maybe it’ll play an", "This is to show how the fftshift function works.", "And here it is with the sine fft. Hopefully you", "Here’s what I was talking about! This is a", "Same workflow but with cosine. =P", "Quintic function! (⁵͜ʖ⁵)", "Yeah from here on out all the puzzles are pretty", "Nice job!", "Incredible!", "Congratulations! You made it to the end! 🛰️"];
+        let msgline2 = ["fundamental signals when it comes to", "oftentimes modulated with an info-bearing", "function will come in handy later on!", "", "the sine signal. What you are currently", "cosine signal in the frequency domain.", "signal with a cosine wave and then took the", "our flatline with a sinusoidal; except this time", "", "and consists of a sine wave divided it by its", "important role later on. ;)", "Basically it rotates the input signal so that what", "get the idea of how fftshift works!", "'square wave' (although a bit rounded). It is", "", "", "much just for fun! ¯\\_(ツ)_/¯", "", "", ""];
+        let msgline3 = ["analog and digital communications.", "signal for the purpose of transmitting", "", "", "looking at is a sine wave in the frequency", "", "fourier transform. The peaks of this signal", "it is a sine wave. There are four peaks due", "", "variable. Sinc functions are often used in", "", "used to be the ends are in the center, and", "", "used to filter signals by their frequencies.", "", "", "", "", "", ""];
+        let msgline4 = ["", "data over long distances.", "", "", "domain.", "", "are smaller due to the flatline’s influence.", "to the flatline’s own frequency!", "", "transforming other signals.", "", "vice versa. Here it’s done with the cosine fft.", "", "Frequencies in the nonzero range go through.", "", "", "", "", "", ""];
+        let jukebox;
+
+        let level = 0;
+
+        const operate = (operation, prevdata = data) => {
+            var newdata = [];
+            var index = 0;
+
+            if (operation == 'sin') {
+                recipe.push("sin");
+                while (index < prevdata.length) {
+                    newdata.push(Math.sin(prevdata[index]))
+                    index += 1;
+                }
+                const result = newdata.filter(Boolean);
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'cos') {
+                recipe.push("cos");
+                while (index < prevdata.length) {
+                    newdata.push(Math.cos(prevdata[index]))
+                    index += 1;
+                }
+                const result = newdata.filter(Boolean);
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'convs') {
+                recipe.push("convs");
+                const sin = operate("sin");
+                recipe.pop();
+                const convolution = conv(prevdata, sin);
+                for (let i = 0; i < convolution.length; i++) {
+                    newdata.push(convolution[i] / 500)
+                }
+                const result = newdata.filter(Boolean).filter((element, index) => {
+                    return index % 2 === 0;
+                });
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'convc') {
+                recipe.push("convc");
+                const cos = operate("cos");
+                recipe.pop();
+                const convolution = conv(prevdata, cos);
+                for (let i = 0; i < convolution.length; i++) {
+                    newdata.push(convolution[i] / 500)
+                }
+                const result = newdata.filter(Boolean).filter((element, index) => {
+                    return index % 2 === 0;
+                });
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'mult') {
+                recipe.push("mult");
+                const t = [...Array(size + 1)].map((x, y) => min + step * y);
+                while (index < prevdata.length) {
+                    newdata.push(prevdata[index] * (t[index]) / 10);
+                    index += 1;
+                }
+                const result = newdata.filter(Boolean).filter(num => isFinite(num));
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'div') {
+                recipe.push("div");
+                const t = [...Array(size + 1)].map((x, y) => min + step * y);
+                while (index < prevdata.length) {
+                    newdata.push(prevdata[index] / (t[index]) * 10);
+                    index += 1;
+                }
+                const result = newdata.filter(Boolean).filter(num => isFinite(num));
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'fft') {
+                recipe.push("fft");
+                const fft = fourier(prevdata);
+                const result = fft.filter(Boolean);
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'fftshift') {
+                recipe.push("fftshift");
+                const ffts = fftshift(prevdata);
+                const result = ffts;
+                draw(result);
+                data = result;
+                return result;
+            }
+
+            if (operation == 'clear') {
+                recipe = [];
+                draw(new Array(101).fill(0));
+                data = [...Array(size + 1)].map((x, y) => min + step * y);
+
+            }
+
+        }
+
+        const check = () => {
+            if (recipe.toString() == order.toString()) {
+                ctx.font = "italic 30px sans-serif";
+                ctx.fillStyle = 'green';
+                ctx.fillText("✓ Correct!", 600, 225);
+                ctx.font = "12px sans-serif";
+                ctx.fillStyle = '#000000';
+                ctx.fillText(msgline1[level - 1], 557.5, 255);
+                ctx.fillText(msgline2[level - 1], 557.5, 270);
+                ctx.fillText(msgline3[level - 1], 557.5, 285);
+                ctx.fillText(msgline4[level - 1], 557.5, 300);
+            }
+        }
+
+        const draw = (points) => {
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 540, 1000);
+            ctx.stroke();
+
+            ctx.lineWidth = 2;
+            const xoffset = 115;
+            const yoffset = 325;
+            const xmultiple = 3;
+            const ymultiple = 5;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#dddddd';
+
+            ctx.moveTo(263, 60);
+            ctx.lineTo(263, 360);
+
+            ctx.moveTo(40, 325);
+            ctx.lineTo(490, 325);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#1a8cc8';
+
+            var i = 0;
+            ctx.moveTo(xoffset + (i * xmultiple), yoffset - (points[i] * ymultiple));
+            while (i < points.length) {
+                ctx.lineTo(xoffset + (i * xmultiple), yoffset - (points[i] * ymultiple));
+                i += 1;
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.fillRect(0, 0, 10, 400);
+            ctx.fillRect(520, 0, 10, 400);
+            ctx.fillRect(0, 0, 530, 39);
+            ctx.fillRect(0, 384, 530, 400);
+            ctx.stroke();
+
+            ctx.font = "20px sans-serif";
+            ctx.fillStyle = '#000000';
+            ctx.fillText("Current Signal", 200, 30);
+            ctx.strokeRect(10, 40, 510, 345);
+            ctx.stroke();
+            check();
+        }
+
+        const conv = (v1, v2) => {
+            var disp = 0;
+            var vector = [];
+            for (let i = 0; i < v2.length; i++) {
+                vector.push(v1[0] * v2[i]);
+            }
+            disp = disp + 1;
+            for (i = 1; i < v1.length; i++) {
+                for (j = 0; j < v2.length; j++) {
+                    if ((disp + j) !== vector.length) {
+                        vector[disp + j] = vector[disp + j] + (v1[i] * v2[j])
+                    }
+                    else {
+                        vector.push(v1[i] * v2[j]);
+                    }
+                }
+                disp = disp + 1;
+            }
+            return vector;
+        }
+
+        const rotate = (src, n) => {
+            var len = src.length
+            reverse(src, 0, len)
+            reverse(src, 0, n)
+            reverse(src, n, len)
+            return src
+        }
+
+        const reverse = (src, from, to) => {
+            --from
+            while (++from < --to) {
+                var tmp = src[from]
+                src[from] = src[to]
+                src[to] = tmp
+            }
+        }
+
+        const fftshift = (src) => {
+            const len = src.length
+            return rotate(src, Math.floor(len / 2))
+        }
+
+        const fourier = (in_array) => {
+            var len = in_array.length;
+            var output = new Array();
+
+            for (var k = 0; k < len; k++) {
+                var real = 0;
+                var imag = 0;
+                for (var n = 0; n < len; n++) {
+                    real += in_array[n] * Math.cos(-2 * Math.PI * k * n / len);
+                    imag += in_array[n] * Math.sin(-2 * Math.PI * k * n / len);
+                }
+                output.push(Math.abs(real))
+            }
+            return output;
+        }
+
+        draw(new Array(101).fill(0));
+
+        const switchlevel = (cmd) => {
+            if ((level == 0 && cmd > 0) || (level == 1 && cmd > 0) || (level > 1 && level < 20) || (level == 20 && cmd < 0)) {
+                level += cmd;
+            }
+
+            document.getElementById("levellabel").innerHTML = `LEVEL ${level}`;
+
+            let min = -50,
+                max = 50,
+                size = 100,
+                step = ((max - min) / size);
+
+            let protodata = [...Array(size + 1)].map((x, y) => min + step * y);
+
+            switch (level) {
+                case 1:
+                    order = ["sin"];
+                    break;
+                case 2:
+                    order = ["cos"];
+                    break;
+                case 3:
+                    order = ["mult"];
+                    break;
+                case 4:
+                    order = ["cos", "mult"];
+                    break;
+                case 5:
+                    order = ["sin", "fft"];
+                    break;
+                case 6:
+                    order = ["cos", "fft"];
+                    break;
+                case 7:
+                    order = ["convc", "fft"];
+                    break;
+                case 8:
+                    order = ["convs", "fft"];
+                    break;
+                case 9:
+                    order = ["mult", "fft"];
+                    break;
+                case 10:
+                    order = ["sin", "div"];
+                    break;
+                case 11:
+                    order = ["sin", "div", "fft"];
+                    break;
+                case 12:
+                    order = ["cos", "fft", "fftshift"];
+                    break;
+                case 13:
+                    order = ["sin", "fft", "fftshift"];
+                    break;
+                case 14:
+                    order = ["sin", "div", "fft", "fftshift"];
+                    break;
+                case 15:
+                    order = ["cos", "div", "fft", "fftshift"];
+                    break;
+                case 16:
+                    order = ["mult", "mult", "mult", "mult"];
+                    break;
+                case 17:
+                    order = ["sin", "mult", "fft"];
+                    break;
+                case 18:
+                    order = ["convs", "fft", "fftshift"];
+                    break;
+                case 19:
+                    order = ["convc", "mult", "fft", "fftshift"];
+                    break;
+                case 20:
+                    order = ["sin", "convs", "mult", "fft", "fftshift"];
+                    break;
+                default:
+                    order = ["clear"];
+                    break;
+            }
+            matches = 0;
+
+            var p = 0;
+
+            while (p < order.length) {
+                protodata = operate(order[p], protodata);
+                p += 1;
+            }
+
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(546, 41, 248, 148);
+            ctx.stroke();
+
+            ctx.lineWidth = 2;
+            const xoffset = 595;
+            const yoffset = 165;
+            const xmultiple = 1.5;
+            const ymultiple = 2.5;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#dddddd';
+
+            ctx.moveTo(669, 50);
+            ctx.lineTo(669, 180);
+
+            ctx.moveTo(560, 165);
+            ctx.lineTo(780, 165);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#1a8cc8';
+
+            var i = 0;
+            ctx.moveTo(xoffset + (i * xmultiple), yoffset - (protodata[i] * ymultiple));
+            while (i < protodata.length) {
+                ctx.lineTo(xoffset + (i * xmultiple), yoffset - (protodata[i] * ymultiple));
+                i += 1;
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.fillRect(530, 0, 14, 400);
+            ctx.fillRect(796, 0, 12, 400);
+            ctx.fillRect(530, 0, 400, 39);
+            ctx.fillRect(530, 191, 400, 400);
+            ctx.stroke();
+
+            ctx.font = "20px sans-serif";
+            ctx.fillStyle = '#000000';
+            ctx.fillText("Desired Signal", 605, 30);
+            ctx.strokeRect(545, 40, 250, 150);
+            ctx.stroke();
+
+            operate("clear");
+            operate("clear");
+            recipe = [];
+        }
+
+        switchlevel(1);
+
+        const playmusic = () => {
+            const tracks = [
+                "https://audio.jukehost.co.uk/5yxEggFuNQzLKWldOJ22ocrVB4bkNAMT",
+                "https://audio.jukehost.co.uk/adlOeJLKyO5EYaPhDsyA15oLcrhlmDEG",
+                "https://audio.jukehost.co.uk/eWxtvSo8Roxxx2AyAVSxjESMwru0IqmB",
+                "https://audio.jukehost.co.uk/ThlYl1lxfmNKXUU2WS8SSZLTlYfep7tU",
+                "https://audio.jukehost.co.uk/2Mq8Td0AvAhjLZcjdbgmAgzX9IbkfVj6",
+                "https://audio.jukehost.co.uk/v26yl3OoEvUr4urdOP847VifCmCYhVjk",
+                "https://audio.jukehost.co.uk/Fae88QEVWf9XMSavcE1V2XstkJttU0V1"
+            ];
+            const index = Math.floor(Math.random() * (7));
+            if (jukebox != undefined) {
+                jukebox.pause();
+            }
+            jukebox = new Audio(tracks[index]);
+            jukebox.play();
+        }
+
+        const stopmusic = () => {
+            jukebox.pause();
+        }
+
+    </script>
+    <div>
+        <div style="display: flex; max-width: 650px;">
+            <div>
+                <button class='button' onClick='operate("sin")'>sin(t)</button>
+                <button class='button' onClick='operate("cos")'>cos(t)</button>
+                <button class='button' onClick='operate("convc")'>conv(___,cos(t))</button>
+                <button class='button' onClick='operate("convs")'>conv(___,sin(t))</button></br>
+                <button class='button' onClick='operate("mult")'>___ × t</button>
+                <button class='button' onClick='operate("div")'>___ ÷ t</button>
+                <button class='button' onClick='operate("fft")'>FFT</button>
+                <button class='button' onClick='operate("fftshift")'>FFTSHIFT</button>
+            </div>
+            <div>
+                <button class='button2' onClick='operate("clear")'>⌫</button></br>
+            </div>
+
+        </div>
+        <button class='button' onClick='switchlevel(-1)'>←</button>
+        <button class='button3' onClick='playmusic()'>🎜</button>
+        <button class='button3' onClick='stopmusic()'>𝄽</button>
+        <button class='button' onClick='switchlevel(1)'>→</button></br>
+        <span>Music Sourced From <i>432 Hertz: A Playlist</i> by SupaT</span>
+
+    </div>
+</body>
+
+</html>
