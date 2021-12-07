@@ -93,7 +93,7 @@
                 <li>Scalable: <i>ax1(t) → ay1(t)</i></li>
                 <li>Additive: <i>x3(t) = x1(t) + x2(t)</i> maps to <i>y3(t) = y1(t) + y2(t)</i></li>
             </ul>
-            <br/>
+            <br />
             <li>When the impulse response is time-invariant it means that regardless of where you start measuring the
                 signal, that subsection can be replicated anywhere else in the given signal.</li>
             <ul>
@@ -238,8 +238,8 @@
 
             if (operation == 'fft') {
                 recipe.push("fft");
-                const fft = fourier(prevdata);
-                const result = fft.filter(Boolean);
+                const ft = fft(prevdata);
+                const result = ft.filter(Boolean);
                 draw(result);
                 data = result;
                 return result;
@@ -348,44 +348,40 @@
             return vector;
         }
 
-        const rotate = (src, n) => {
-            var len = src.length
-            reverse(src, 0, len)
-            reverse(src, 0, n)
-            reverse(src, n, len)
-            return src
+        const rotate = (arr, n) => {
+            reverse(arr, 0, arr.length)
+            reverse(arr, 0, n)
+            reverse(arr, n, arr.length)
+            return arr
         }
 
-        const reverse = (src, from, to) => {
+        const reverse = (arr, from, to) => {
             --from
             while (++from < --to) {
-                var tmp = src[from]
-                src[from] = src[to]
-                src[to] = tmp
+                var tmp = arr[from]
+                arr[from] = arr[to]
+                arr[to] = tmp
             }
         }
 
-        const fftshift = (src) => {
-            const len = src.length
-            return rotate(src, Math.floor(len / 2))
+        const fftshift = (arr) => {
+            return rotate(arr, Math.floor(arr.length / 2))
         }
 
-        const fourier = (in_array) => {
-            var len = in_array.length;
+        const fft = (arr) => {
             var output = new Array();
-
-            for (var k = 0; k < len; k++) {
-                var real = 0;
-                var imag = 0;
-                for (var n = 0; n < len; n++) {
-                    real += in_array[n] * Math.cos(-2 * Math.PI * k * n / len);
-                    imag += in_array[n] * Math.sin(-2 * Math.PI * k * n / len);
+            for (var k = 0; k < arr.length; k++) {
+                var rcomp = 0;
+                var icomp = 0;
+                for (var n = 0; n < arr.length; n++) {
+                    rcomp += arr[n] * Math.cos(-2 * Math.PI * k * n / arr.length);
+                    icomp += arr[n] * Math.sin(-2 * Math.PI * k * n / arr.length);
                 }
-                output.push(Math.abs(real))
+                output.push(Math.abs(rcomp))
             }
             return output;
         }
-
+        
         draw(new Array(101).fill(0));
 
         const switchlevel = (cmd) => {
