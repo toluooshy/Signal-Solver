@@ -256,7 +256,8 @@
 
             if (operation == 'clear') {
                 recipe = [];
-                draw(new Array(101).fill(0));
+     
+                draw([...Array(101).keys()].map(i => (i - 50)/6));
                 data = [...Array(size + 1)].map((x, y) => min + step * y);
 
             }
